@@ -1,0 +1,14 @@
+.chat_window {
+  display: flex;
+  height: 100vh;
+}
+
+.chat_list {
+  flex: 3;
+  border: solid;
+}
+
+.chat_person {
+  flex: 7;
+  border: solid;
+}
