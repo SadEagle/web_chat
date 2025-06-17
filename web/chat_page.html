@@ -9,13 +9,48 @@
   <link rel="stylesheet" href="css/chat.css">
 </head>
 
+
 <body>
-  <div class="chat_window">
-    <div class="chat_list">
-      Chat list + search on the top
+  <div class="main">
+    <div class="groups">
+      <!-- TODO: Need to use js and generate certain amount of chats, for now will make 2 dummy chats -->
+      <div class="group_item search_position">
+        <input type="text" placeholder="Search" class="group_search no_border">
+      </div>
+      <div class="group_item group_position">
+        <div class="group_title">Dummy group 1</div>
+        <div class="group_intro">Dummy_text</div>
+      </div>
+      <div class="group_item group_position">
+        <div class="group_title">Dummy group 2</div>
+        <div class="group_intro">Dummy_text</div>
+      </div>
     </div>
-    <div class="chat_person">
-      Chat itself
+    <div class="chat">
+      <div class="chat_message_box">
+        <div class="chat_message_setup">
+          <div class="my_message">Hello world!</div>
+          <div class="stranger_message">Amen, hello!</div>
+          <div class="stranger_message">
+            Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+            message. Test long message. Test long message. Test long message. Test long message. Test long message. Test
+            long message. Test long message. Test long message. Test long message. Test long message. Test long message.
+            Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+            message. Test long message. Test long message. Test long message. Test long message.
+            Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+            message. Test long message. Test long message. Test long message. Test long message. Test long message. Test
+            long message. Test long message. Test long message. Test long message. Test long message. Test long message.
+            Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+            message. Test long message. Test long message. Test long message. Test long message. Test long message. Test
+            long message. Test long message. Test long message. </div>
+        </div>
+      </div>
+      <form action="/api/send_message" class="chat_message_write">
+        <textarea placeholder="Write a message..." name="message"
+          class="write_message_textarea right_border"></textarea>
+        <input type="submit" value="" class="send_msg_button">
+      </form>
+
     </div>
   </div>
 </body>

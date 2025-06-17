@@ -1,14 +1,155 @@
-.chat_window {
+:root {
+  --message_padding: 0.5em;
+  --message_margin: 0.5em;
+  --message_border_radius: 0.5em;
+
+  /* Tied colors */
+  --main_bg: #367588;
+  --msg_bg: #004953;
+  --search_bg: #5f9ea0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Main window flex */
+.main {
   display: flex;
   height: 100vh;
+  background-color: var(--main_bg);
 }
 
-.chat_list {
-  flex: 3;
+.groups {
+  /* Flex-item*/
+  flex: 0 0 30%;
+  max-width: 500px;
+
+  display: flex;
+  flex-direction: column;
+  /* overflow-x: auto; */
+  background-color: inherit;
   border: solid;
 }
 
-.chat_person {
-  flex: 7;
+.chat {
+  /* Flex-item */
+  flex-grow: 0 0 70%;
+
+  display: flex;
+  flex-direction: column;
   border: solid;
+}
+
+/* Chat_list setup */
+.group_item {
+  flex: 0 0 4em;
+
+  display: flex;
+  border: solid;
+}
+
+.group_search {
+  border-radius: 45px;
+  margin: 1em;
+  padding: 0.5em;
+  width: 100%;
+  background-color: var(--search_bg);
+}
+
+.search_position {
+  justify-content: center;
+}
+
+.group_position {
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.group_item>.group_title {
+  font-size: 1.5em;
+}
+
+.group_item>.group_intro {
+  font-size: 0.8em;
+}
+
+
+.chat_message_box {
+  flex: 1;
+  display: flex;
+  background-color: var(--msg_bg);
+  border: solid;
+  overflow-y: auto;
+}
+
+/* Chat_person setup */
+.chat_message_setup {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.chat_message_write {
+  /* Flex-item */
+  flex: 0 0 4em;
+
+  display: flex;
+  border: solid;
+  background-color: inherit;
+}
+
+.write_message_textarea {
+  flex-grow: 1;
+
+  padding: 0.5em;
+  resize: none;
+  vertical-align: middle;
+  background-color: inherit;
+}
+
+.send_msg_button {
+  /* Flex-item */
+  flex: 0 0 4em;
+
+  border: none;
+  background: url("../images/send-button.png");
+  background-size: 100% 100%;
+}
+
+
+.no_border,
+.no_border:focus {
+  outline: none;
+  border: none;
+}
+
+.right_border,
+.right_border:focus {
+  outline: none;
+  border: none;
+  border-right: solid;
+}
+
+/* chat_message_text area */
+.my_message {
+  align-self: end;
+  background-color: green;
+  padding: var(--message_padding);
+  margin: var(--message_margin);
+  border-radius: var(--message_border_radius);
+  max-width: 80%;
+  overflow-wrap: break-word;
+}
+
+.stranger_message {
+  align-self: start;
+  background-color: royalblue;
+  padding: var(--message_padding);
+  margin: var(--message_margin);
+  border-radius: var(--message_border_radius);
+  max-width: 80%;
+  overflow-wrap: break-word;
 }
