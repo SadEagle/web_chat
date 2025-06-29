@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title> Login </title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/login.css">
+
+</head>
+
+<body>
+  <div class="reg_window">
+    <fieldset>
+      <form action="/api/login">
+        <label for="flogin">Login:</label><br>
+        <input type="text" id="flogin" name="name" autofocus><br><br>
+        <label for="fpass">Passord:</label><br>
+        <input type="password" id="fpass" name="pass"><br><br>
+        <input type="button" value="Register" onclick="redirectToCreateUser()">
+        <input type="submit" value="Sign in">
+      </form>
+
+    </fieldset>
+  </div>
+
+  <script>
+    function redirectToCreateUser() {
+      window.location.href = "create_user.html"; // Replace with your URL
+    }
+  </script>
+</body>
+
+</html>

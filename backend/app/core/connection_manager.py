@@ -5,7 +5,7 @@ from operator import itemgetter
 
 from fastapi import WebSocket
 
-from app.core.chat_message import ChatMessage
+from app.core.base_models import ChatMessage
 
 
 class ConnectionManager:

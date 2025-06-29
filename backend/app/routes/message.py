@@ -1,15 +1,20 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+
+from app.core.base_model import Message, MessageBatchRequest
+from app.deps import ConnectionDep
+from backend.app.core.db import store_message_db
 
 
-message_route = APIRouter()
+message_route = APIRouter(prefix="/message")
 
 
-@message_route.post("send_message")
-def send_message(msg: ChatMessage):
-    # TODO:
-    # 0. Get user_list from valkey server
-    # 1. Send message to sqlalchemy
-    # 2. Check existence of the chat and send confirmation to user that message was ok (may be add icon for message like telegram)
-    # 3. Create task queue send messages to clients. Probably simple option to make one more process
+@message_route.post("/send_message")
+async def send_message(conn: ConnectionDep, msg: Message):
+    # TODO: Use combination websocket for notification and user verification
+    store_message_db(conn, msg)
+
+
+async def get_batch_message(
+    conn: ConnectionDep, message_batch_request: MessageBatchRequest
+):
     pass

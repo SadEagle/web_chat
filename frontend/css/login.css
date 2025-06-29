@@ -1,0 +1,29 @@
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .reg_window {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    fieldset {
+      width: 500px;
+    }
+
+    fieldset input[type=text],
+    fieldset input[type=password] {
+      width: 100%;
+    }
+
+    fieldset input[type=submit] {
+      float: right
+    }
