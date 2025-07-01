@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from passlib.context import CryptContext
 
-from app.core.base_model import User, UserToken
+from app.core.base_model import UserToken
 from app.core.config import settings
 
 
@@ -44,7 +44,9 @@ def create_access_token(
 
 def verify_access_token(token: str) -> UserToken | None:
     try:
-        user_data = jwt.decode(token, "secret", algorithms=["HS256"])
+        user_data = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=settings.JWT_HASH_ALGORITHM
+        )
     except jwt.ExpiredSignatureError:
         return None
     return UserToken(**user_data)

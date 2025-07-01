@@ -5,7 +5,7 @@ from operator import itemgetter
 
 from fastapi import WebSocket
 
-from app.core.base_models import ChatMessage
+from app.core.base_model import MessageCreate
 
 
 class ConnectionManager:
@@ -34,7 +34,7 @@ class ConnectionManager:
         return user_names[0], user_names[1]
 
     async def send_personal_message(
-        self, message: ChatMessage, websocket: WebSocket
+        self, message: MessageCreate, websocket: WebSocket
     ) -> None:
         """Optimised 2 user messaging
 

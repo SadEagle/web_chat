@@ -2,7 +2,6 @@ from typing import Annotated, Generator
 
 from fastapi import Depends
 from sqlalchemy import Connection
-from sqlalchemy.orm import Session
 
 from app.core.db import engine
 

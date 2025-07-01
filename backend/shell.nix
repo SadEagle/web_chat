@@ -15,6 +15,9 @@ pkgs.mkShell {
       pydantic-settings
       fastapi-cli
       sqlalchemy
+
+      python-multipart
+      email-validator
     ]))
   ];
 }

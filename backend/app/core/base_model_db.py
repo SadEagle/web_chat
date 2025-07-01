@@ -1,19 +1,18 @@
-from enum import IntEnum
 from sqlalchemy import Column, ForeignKey, MetaData, Table, func
-from sqlalchemy.types import Integer, String, Text, Date, DateTime
+from sqlalchemy.types import Integer, String, Text, DateTime
 
 
 metadata_obj = MetaData()
 
+# TODO: transform all datetime into triggers those write those values
 user_db = Table(
     "user",
     metadata_obj,
     Column("id", Integer, primary_key=True),
     Column("login", String(50), unique=True),
     Column("email", String(50), unique=True),
-    Column("hashed_passwd", String(50), unique=True),
-    Column("create_at", Date, default=func.current_date()),
-    Column("last_activity_at", DateTime, default=func.current_timestamp()),
+    Column("hashed_passwd", String(50)),
+    Column("create_at", DateTime, server_default=func.now()),
 )
 
 # TODO: add indexing by creation date
@@ -22,7 +21,7 @@ message_db = Table(
     metadata_obj,
     Column("id", Integer, primary_key=True),
     Column("message_text", Text),
-    Column("send_at", Integer),
+    Column("send_at", DateTime, server_default=func.now()),
     Column("chat_id", ForeignKey("chat.id")),
     Column("user_id", ForeignKey("user.id")),
 )
