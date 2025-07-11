@@ -12,15 +12,15 @@
 <body>
   <div class="reg_window">
     <fieldset>
-      <!-- <legend>Create user:</legend> -->
-      <form id="login_form">
+      <!-- <legend>Update user:</legend> -->
+      <form action="/api/login/create_user">
         <label for="flogin">Login:</label><br>
-        <input type="text" id="flogin" name="name" autofocus><br><br>
+        <input type="text" id="flogin" name="login" disabled><br><br>
         <label for="femail">Email:</label><br>
-        <input type="text" id="femail" name="email"><br><br>
+        <input type="text" id="femail" name="email" autofocus><br><br>
         <label for="fpass">Passord:</label><br>
         <input type="text" id="fpass" name="pass"><br><br>
-        <input type="submit" value="Create">
+        <input type="submit" value="Update">
       </form>
 
     </fieldset>

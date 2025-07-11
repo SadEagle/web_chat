@@ -17,7 +17,7 @@ app.include_router(message.message_route)
 # WARN: need to be set up at the end of all other exception handlers
 @app.exception_handler(Exception)
 async def unexpected_exception_handler(request: Request, exc: Exception):
-    # TODO: add logger for catch undefined errors instead of print
+    # TODO: add logger for catch undefined errors instead of print and add proper error message
     print(exc)
     return PlainTextResponse(
         content=f"Unexpected exception appeared. {exc}",

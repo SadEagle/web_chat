@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy import Connection
 
 from app.core.db import engine
+from app.core.config import settings, RunMode
 
 
 def get_db() -> Generator[Connection, None, None]:

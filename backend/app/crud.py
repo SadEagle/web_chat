@@ -10,125 +10,173 @@ from sqlalchemy import (
 )
 
 from app.core.base_model import (
-    UserSecret,
-    BaseUser,
+    ChatDB,
+    ChatUserCreate,
+    ChatUserDB,
     UserDB,
-    UserCreate,
-    UserSecretCreate,
-    UserUpdate,
-    MessageDB,
+    UserCreateSecure,
+    UserUpdateSecure,
     MessageCreate,
+    MessageDB,
+    MessageBatch,
 )
-from app.secret import get_passwd_hash
-from app.core.base_model_db import user_db, message_db, chat_db
+from app.core.base_db_model import user_db, message_db, chat_user_db, chat_db
 from app.deps import ConnectionDep
 from app.exceptions import DuplicateError
 
 
-# TODO: transfer all database request into async
-def create_user_db(conn: ConnectionDep, user_create: UserCreate) -> UserDB:
-    user_create_data = user_create.model_dump()
+msg_adapter = TypeAdapter(list[MessageDB])
+chat_user_list_adapter = TypeAdapter(list[UserDB])
+chat_user_per_line_adapter = TypeAdapter(list[ChatUserDB])
 
-    user_secure = UserSecretCreate(
-        **user_create_data, hashed_passwd=get_passwd_hash(user_create.passwd)
-    )
+
+def create_user_db(conn: ConnectionDep, user_secure: UserCreateSecure) -> UserDB | None:
     try:
         user_result = conn.execute(
             insert(user_db)
             .returning(user_db)
             .values(user_secure.model_dump(mode="json"))
-        )
+        ).mappings()
     except IntegrityError as exc:
         if "UNIQUE constraint failed: user.login" in str(exc):
             raise DuplicateError(f"Login '{user_secure.login}' already exists")
         elif "UNIQUE constraint failed: user.email" in str(exc):
             raise DuplicateError(f"Email '{user_secure.email}' already exists")
         else:
-            raise DuplicateError(f"Unexpected duplicate value")
-    return UserDB(**user_result.first()._mapping)  # type: ignore
+            raise DuplicateError(f"Unexpected duplicate value. {exc}")
+    # TODO: fix
+    user_row = user_result.first()
+    if user_row is None:
+        return None
+    return UserDB.model_validate(user_row)
 
 
-def update_user_db(conn: ConnectionDep, user_update: UserUpdate) -> BaseUser:
-    update_data = user_update.model_dump(exclude_defaults=True, mode="json")
+def update_user_db(
+    conn: ConnectionDep, user_secret_update: UserUpdateSecure
+) -> UserDB | None:
     try:
         updated_users = conn.execute(
             update(user_db)
-            .where(user_db.c.login == update_data["login"])
+            .where(user_db.c.id == user_secret_update.user_id)
             .returning(user_db)
-            .values(update_data)
-        )
+            .values(
+                user_secret_update.model_dump(
+                    exclude_defaults=True,
+                    mode="json",
+                    by_alias=True,
+                )
+            )
+        ).mappings()
     except IntegrityError as exc:
         if "email" in str(exc).lower():
-            raise DuplicateError(f"Email '{user_update.email}' already exists")
+            raise DuplicateError(f"Email '{user_secret_update.email}' already exists")
         else:
-            raise DuplicateError(f"Unexpected column duplicate")
-    user_dict = dict(updated_users.first()._mapping)  # type: ignore
-    return BaseUser(**user_dict)
-
-
-def get_user_db(conn: ConnectionDep, user_name: str) -> UserSecret | None:
-    user = conn.execute(select(user_db).where(user_db.c.login == user_name)).mappings()
-    user_data = user.fetchall()
-    if len(user_data) == 0:
+            raise DuplicateError("Unexpected column duplicate")
+    user_row = updated_users.first()
+    if user_row is None:
         return None
-    return UserSecret(**user_data[0])
+    return UserDB.model_validate(user_row)
 
 
-# TODO: add crate group function, some day:)
-# def create_group(conn: Connection, group_name: str, user_logins: list[str]):
-#     pass
+def get_user_db(conn: ConnectionDep, user_name: str) -> UserDB | None:
+    user = conn.execute(select(user_db).where(user_db.c.login == user_name))
+    user_row = user.first()
+    if user_row is None:
+        return None
+    return UserDB.model_validate(user_row._mapping)
 
 
-def store_message_db(conn: ConnectionDep, message: MessageCreate) -> MessageDB:
+# TODO: check
+def get_chat_user_list(conn: ConnectionDep, chat_id: int) -> list[UserDB]:
+    user_list = conn.execute(
+        select(chat_user_db).where(chat_user_db.c.chat_id == chat_id)
+    ).mappings()
+    return chat_user_list_adapter.validate_python(user_list)
+
+
+# TODO: check
+def create_chat(conn: ConnectionDep, chat_name: str) -> ChatDB:
+    try:
+        created_chat = conn.execute(
+            insert(chat_db).returning(chat_db).values(name=chat_name)
+        ).mappings()
+    except IntegrityError as exc:
+        if "UNIQUE constraint failed: chat.name" in str(exc):
+            raise DuplicateError(f"Chat name '{chat_name}' already exists")
+        else:
+            raise DuplicateError("Unexpected column duplicate")
+    return ChatDB.model_validate(created_chat.first())
+
+
+def create_chat_user_list(
+    conn: ConnectionDep, chat_user_create: ChatUserCreate
+) -> list[ChatUserDB]:
+    try:
+        chat_user_updated = conn.execute(
+            insert(chat_user_db),
+            list(
+                map(
+                    lambda user_id: {
+                        "chat_id": chat_user_create.chat_id,
+                        "user_id": user_id,
+                    },
+                    chat_user_create.user_id_list,
+                )
+            ),
+        ).mappings()
+    # TODO: Change error to log and ignore 2nd adding certain user?
+    except IntegrityError:
+        raise DuplicateError("Some users already added")
+    return chat_user_per_line_adapter.validate_python(chat_user_updated)
+
+
+def store_message_db(conn: ConnectionDep, message: MessageCreate) -> MessageDB | None:
     message_data = message.model_dump(mode="json")
     message_result = conn.execute(
         insert(message_db).returning(message_db).values(message_data)
     )
-    return MessageDB(**message_result.first()._mapping)
+    message_row = message_result.first()
+    if message_row is None:
+        return None
+    return MessageDB.model_validate(message_row._mapping)
 
 
-# def get_message_batch_db(
-#     conn: ConnectionDep,
-#     chat_name: str,
-#     last_message_time: datetime | None = None,
-#     msg_count: int = 200,
-# ) -> MessageBatch | None:
-#     chat_id_subq = select(chat_db.c.id).where(chat_db.c.name == chat_name).subquery()
-#     if last_message_time is None:
-#         msg_batch_query = (
-#             select(message_db)
-#             .where(message_db.c.user_id == chat_id_subq)
-#             .order_by(desc(message_db.c.send_at))
-#             .limit(msg_count)
-#         )
-#     else:
-#         msg_batch_query = (
-#             select(message_db)
-#             .where(message_db.c.user_id == chat_id_subq)
-#             .where(message_db.c.send_at <= last_message_time)
-#             .order_by(desc(message_db.c.send_at))
-#             .limit(msg_count)
-#         )
-#
-#     msg_batch = conn.execute(msg_batch_query)
-#
-#     batch_size = msg_batch.rowcount
-#     if batch_size == 0:
-#         return None
-#     msg_adapter = TypeAdapter(list[Message])
-#     msg_arr = msg_adapter.validate_python([dict(msg._mapping) for msg in msg_batch])
-#     first_message_time = msg_arr[0].send_at
-#     last_message_time = msg_arr[-1].send_at
-#     return MessageBatch(
-#         message_arr=msg_arr,
-#         batch_size=batch_size,
-#         first_message_time=first_message_time,
-#         last_message_time=last_message_time,
-#     )
+# TODO: think that this search script not that efficent on huge texts. Probably, need to make some marks what date is above
+def get_message_batch_db(
+    conn: ConnectionDep,
+    chat_id: int,
+    last_message_time: datetime | None = None,
+    msg_count: int = 200,
+) -> MessageBatch | None:
+    if last_message_time is None:
+        msg_batch_query = (
+            select(message_db)
+            .where(message_db.c.user_id == chat_id)
+            .order_by(desc(message_db.c.send_at))
+            .limit(msg_count)
+        )
+    else:
+        msg_batch_query = (
+            select(message_db)
+            .where(message_db.c.chat_id == chat_id)
+            .where(message_db.c.send_at <= last_message_time)
+            .order_by(desc(message_db.c.send_at))
+            .limit(msg_count)
+        )
+    msg_batch_seq = conn.execute(msg_batch_query).mappings().fetchall()
+    if len(msg_batch_seq) == 0:
+        return None
+    msg_arr = msg_adapter.validate_python([msg for msg in msg_batch_seq])
+    first_message_time = msg_arr[0].send_at
+    last_message_time = msg_arr[-1].send_at
+    return MessageBatch(
+        chat_id=chat_id,
+        message_arr=msg_arr,
+        batch_size=msg_count,
+        first_message_time=first_message_time,
+        last_message_time=last_message_time,
+    )
 
 
-# def get_last_message(conn: Connection, chat_name: str) -> Message:
-#     pass
-
-# def get_chat_user_list(conn: Connection, chat_name: str):
+# def get_chat_user_list(conn: Connection, chat_name: str) -> :
 #     pass

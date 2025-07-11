@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from passlib.context import CryptContext
 
-from app.core.base_model import UserToken
+from app.core.base_token_model import TokenData
 from app.core.config import settings
 
 
@@ -28,7 +28,7 @@ def verify_passwd_hash(passwd: str, hash_passwd: str) -> bool:
 
 
 def create_access_token(
-    data: UserToken,
+    data: TokenData,
     expires_delta: timedelta = timedelta(minutes=15),
 ) -> str:
     expire = datetime.now(timezone.utc) + expires_delta
@@ -42,11 +42,11 @@ def create_access_token(
     return encoded_jwt
 
 
-def verify_access_token(token: str) -> UserToken | None:
+def verify_access_token(token: str) -> TokenData | None:
     try:
         user_data = jwt.decode(
             token, settings.SECRET_KEY, algorithms=settings.JWT_HASH_ALGORITHM
         )
     except jwt.ExpiredSignatureError:
         return None
-    return UserToken(**user_data)
+    return TokenData.model_validate(user_data)

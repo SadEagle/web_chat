@@ -12,11 +12,12 @@
 <body>
   <div class="reg_window">
     <fieldset>
-      <form action="/api/login/login_user">
+      <!-- <legend>Login:</legend> -->
+      <form id="login_form">
         <label for="flogin">Login:</label><br>
-        <input type="text" id="flogin" name="name" autofocus><br><br>
+        <input type="text" id="login" name="login" autofocus><br><br>
         <label for="fpass">Passord:</label><br>
-        <input type="password" id="fpass" name="pass"><br><br>
+        <input type="password" id="password" name="password"><br><br>
         <input type="button" value="Register" onclick="redirectToCreateUser()">
         <input type="submit" value="Sign in">
       </form>
@@ -24,11 +25,7 @@
     </fieldset>
   </div>
 
-  <script>
-    function redirectToCreateUser() {
-      window.location.href = "create_user.html"; // Replace with your URL
-    }
-  </script>
+  <script src="scripts/login.js"></script>
 </body>
 
 </html>
