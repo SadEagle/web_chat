@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- TODO: add check if token exists and try to make get request with token, if legit stay on page, otherwise swith to login page -->
+
+<head>
+  <script type="module" src="scripts/homeRedirection.js"></script>
+  <title> Friends chat </title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="css/chat.css">
+</head>
+
+
+<body>
+  <div class="main">
+    <div class="chat_menu">
+      <div class="group_item search_position">
+        <input type="text" placeholder="Search" class="group_search no_border">
+      </div>
+      <!-- TODO: distinkt search from groups. Now they are scrolling both -->
+      <div class="chat_groups">
+        <!-- TODO: Need to use js and generate certain amount of chats, for now will make 2 dummy chats -->
+        <div class="group_item group_position">
+          <div class="group_title">Dummy group 1</div>
+          <div class="group_intro">Dummy_text</div>
+        </div>
+        <div class="group_item group_position">
+          <div class="group_title">Dummy group 2</div>
+          <div class="group_intro">Dummy_text</div>
+        </div>
+        <div class="group_item group_position">
+          <div class="group_title">Dummy group 3</div>
+          <div class="group_intro">Dummy_text</div>
+        </div>
+        <div class="group_item group_position">
+          <div class="group_title">Dummy group 4</div>
+          <div class="group_intro">Dummy_text</div>
+        </div>
+        <div class="group_item group_position">
+          <div class="group_title">Dummy group 5</div>
+          <div class="group_intro">Dummy_text</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat">
+      <div class="chat_message_box" id="display_chat_box">
+        <!-- WARN: need extra div tag only because flex dont communicate with flex somewhy  -->
+        <!-- FIX: this feels like a bad code -->
+        <div class="chat_display_scroll_container" tabindex="0">
+          <div class="chat_display_setup" id="chat_window">
+            <div class="my_message">Hello world!</div>
+            <div class="stranger_message">Amen, hello!</div>
+            <div class="stranger_message">
+              Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+              message. Test long message. Test long message. Test long message. Test long message. Test long message.
+              Test
+              long message. Test long message. Test long message. Test long message. Test long message. Test long
+              message.
+              Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+              message. Test long message. Test long message. Test long message. Test long message.
+              Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+              message. Test long message. Test long message. Test long message. Test long message. Test long message.
+              Test
+              long message. Test long message. Test long message. Test long message. Test long message. Test long
+              message.
+              Test long message. Test long message. Test long message. Test long message. Test long message. Test long
+              message. Test long message. Test long message. Test long message. Test long message. Test long message.
+              Test
+              long message. Test long message. Test long message. </div>
+          </div>
+        </div>
+      </div>
+      <div class="chat_message_write">
+        <textarea placeholder="Write a message..." name="message" class="write_message_textarea right_border"
+          id="message_area"></textarea>
+        <button class="send_msg_button" id="send_message_button">
+      </div>
+
+    </div>
+  </div>
+
+  <script src="scripts/chatMessage.js"></script>
+  <script src="scripts/chatDisplayPosition.js"></script>
+
+</body>
+
+</html>

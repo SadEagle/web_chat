@@ -1,4 +1,5 @@
-from sqlalchemy import Column, ForeignKey, MetaData, Table, UniqueConstraint, func, true
+from enum import IntEnum
+from sqlalchemy import Column, ForeignKey, MetaData, Table, UniqueConstraint, func
 from sqlalchemy.types import Integer, String, Text, DateTime
 
 

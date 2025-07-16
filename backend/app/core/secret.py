@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from passlib.context import CryptContext
 
-from app.core.base_token_model import TokenData
+from app.data_model.token_model import TokenData
 from app.core.config import settings
 
 

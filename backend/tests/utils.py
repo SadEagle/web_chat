@@ -4,11 +4,11 @@ import string
 
 from pydantic import BaseModel
 
-from app.core.base_model import UserCreate, UserUpdate
+from app.data_model.user_model import UserCreate, UserUpdate
 
 
-class TestUserToken(BaseModel):
-    user_id: int
+class UserTokenTest(BaseModel):
+    id: int
     login: str
     email: str
     passwd: str
@@ -27,7 +27,7 @@ def random_email() -> str:
     return f"{random_lower_string()}@{random_lower_string()}.com"
 
 
-def get_create_user() -> UserCreate:
+def get_random_create_user() -> UserCreate:
     return UserCreate(
         login=random_login(),
         email=random_email(),
@@ -35,9 +35,9 @@ def get_create_user() -> UserCreate:
     )
 
 
-def get_update_user(user_id: int) -> UserUpdate:
+def get_random_update_user(user_id: int) -> UserUpdate:
     return UserUpdate(
-        user_id=user_id,
+        id=user_id,
         login=random_login(),
         email=random_email(),
         passwd=random_lower_string(),

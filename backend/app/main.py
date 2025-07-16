@@ -1,17 +1,27 @@
-from fastapi import FastAPI, Request, status
+from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.responses import PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routes import login, message
+from app.routes import user, message, chat
+
+# Add backend prefix
+app_route = APIRouter(prefix="/api")
+app_route.include_router(user.user_route)
+app_route.include_router(message.message_route)
+app_route.include_router(chat.chat_route)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
 )
-
-app.include_router(login.login_route)
-app.include_router(message.message_route)
-
-# TODO: Add CORS
+app.include_router(app_route)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # WARN: need to be set up at the end of all other exception handlers

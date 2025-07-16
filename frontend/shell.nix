@@ -1,8 +1,15 @@
 # shell.nix
+{
+  pkgs ? import <nixpkgs> { },
+}:
+
 let
-  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/11cb3517b3af6af300dd6c055aeda73c9bf52c48.tar.gz") {};
-in pkgs.mkShell {
+  # jwtdecode = import ./npm-jwt.nix { inherit pkgs; };
+  jwtdecode = pkgs.callPackage ./npm-jwt.nix { };
+in
+pkgs.mkShell {
   packages = with pkgs; [
-      nodejs_24
+    nodejs_24
+    jwtdecode
   ];
 }

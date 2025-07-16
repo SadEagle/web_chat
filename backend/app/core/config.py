@@ -13,7 +13,6 @@ class RunMode(StrEnum):
 class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     JWT_HASH_ALGORITHM: str = "HS256"
-    # WARN: Dummy value
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     # TODO: add some day token for token
@@ -24,9 +23,13 @@ class Settings(BaseSettings):
     BATCH_MESSAGE_SIZE: int = 50
     RUN_MODE: RunMode = RunMode.DEV
     # TODO: isolate in late future
-    SQLALCHEMY_PROD_DB_URL: str = "postgresql://chatter:secret@localhost:5432/prod_chat"
-    SQLALCHEMY_DEV_DB_URL: str = "postgresql://chatter:secret@localhost:5432/dev_chat"
-    SQLALCHEMY_TEST_DB_URL: str = "postgresql://chatter:secret@localhost:5432/test_chat"
+    # SQLALCHEMY_PROD_DB_URL: str = "postgresql://chatter:secret@localhost:5432/prod_chat"
+    # SQLALCHEMY_DEV_DB_URL: str = "postgresql://chatter:secret@localhost:5432/dev_chat"
+    # SQLALCHEMY_TEST_DB_URL: str = "postgresql://chatter:secret@localhost:5432/test_chat"
+
+    SQLALCHEMY_PROD_DB_URL: str = "sqlite:///prod_chat.db"
+    SQLALCHEMY_DEV_DB_URL: str = "sqlite:///dev_chat.db"
+    SQLALCHEMY_TEST_DB_URL: str = "sqlite:///test_chat.db"
 
 
 settings = Settings()

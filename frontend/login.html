@@ -12,20 +12,20 @@
 <body>
   <div class="reg_window">
     <fieldset>
-      <!-- <legend>Login:</legend> -->
-      <form id="login_form">
-        <label for="flogin">Login:</label><br>
-        <input type="text" id="login" name="login" autofocus><br><br>
-        <label for="fpass">Passord:</label><br>
-        <input type="password" id="password" name="password"><br><br>
-        <input type="button" value="Register" onclick="redirectToCreateUser()">
-        <input type="submit" value="Sign in">
+      <legend>Login user:</legend>
+      <form id="loginForm">
+        <label for="login">Login:</label><br>
+        <input type="text" id="login" name="username" autofocus><br><br>
+        <label for="passwd">Password:</label><br>
+        <input type="password" id="passwd" name="password"><br><br>
+        <input type="button" value="Register" onclick="window.location.href='./create_user.html'">
+        <input type="submit" id="submitForm" value="Sign in">
       </form>
 
     </fieldset>
   </div>
 
-  <script src="scripts/login.js"></script>
+  <script src="scripts/loginUser.js"></script>
 </body>
 
 </html>

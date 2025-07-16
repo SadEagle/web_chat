@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 
 from app.core.config import settings, RunMode
-from app.core.base_db_model import metadata_obj
+from app.data_model.db_model import metadata_obj
 
 if settings.RUN_MODE == RunMode.PROD:
     engine = create_engine(settings.SQLALCHEMY_PROD_DB_URL)

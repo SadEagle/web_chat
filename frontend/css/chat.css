@@ -22,9 +22,20 @@
   background-color: var(--main_bg);
 }
 
-.groups {
-  /* Flex-item*/
+.chat_menu {
   flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* .chat_search { */
+/*   flex-grow: 0 0; */
+/* } */
+
+.chat_groups {
+  /* Flex-item*/
+  flex-grow: 0 0;
   max-width: 500px;
 
   display: flex;
@@ -32,6 +43,7 @@
   /* overflow-x: auto; */
   background-color: inherit;
   border: solid;
+  overflow-y: auto;
 }
 
 .chat {
@@ -85,8 +97,12 @@
   overflow-y: auto;
 }
 
+chat_display_scroll_container {
+  overflow-y: auto;
+}
+
 /* Chat_person setup */
-.chat_message_setup {
+.chat_display_setup {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -145,11 +161,11 @@
 }
 
 .stranger_message {
-  align-self: start;
   background-color: royalblue;
   padding: var(--message_padding);
   margin: var(--message_margin);
   border-radius: var(--message_border_radius);
   max-width: 80%;
+  align-self: start;
   overflow-wrap: break-word;
 }

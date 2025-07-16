@@ -1,28 +1,23 @@
-from random import sample
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic_core.core_schema import model_ser_schema
+from fastapi import APIRouter, HTTPException, status
 
-from app.deps import ConnectionDep
-from app.core.base_model import (
+from app.deps import ConnectionDep, UserTokenExtractDep
+from app.data_model.message_model import (
     MessageCreate,
-    MessageBatchRequest,
     MessageBatch,
+    MessageBatchRequest,
 )
-from app.core.base_token_model import TokenData
-from app.crud import get_message_batch_db, store_message_db
-from app.routes.login import get_user_by_token
-from app.core.connection_manager import connection_manager
+from app.data_model.token_model import TokenData
+from app.crud_model.message_crud import get_message_batch_db, store_message_db
 
 
-message_route = APIRouter(prefix="/message")
+message_route_prefix = "/message"
+message_route = APIRouter(prefix=message_route_prefix)
 
 
-# TODO: add connection_manager (websocket)
 @message_route.post("/send_message", status_code=status.HTTP_204_NO_CONTENT)
 def send_message(
     conn: ConnectionDep,
-    user_token: Annotated[TokenData, Depends(get_user_by_token)],
+    user_token: UserTokenExtractDep,
     msg: MessageCreate,
 ):
     if user_token.user_id != msg.user_id:
@@ -35,13 +30,10 @@ def send_message(
     return None
 
 
-# TODO: some complex stuff with valkeydb for next batch and for faster message getting?!
-# Not sure how should it work with multiple users?
-# I mean, it may be good just to store last batch for every group?
 @message_route.post("/get_batch_message")
 def get_batch_message(
     conn: ConnectionDep,
-    user_token: Annotated[TokenData, Depends(get_user_by_token)],
+    user_token: UserTokenExtractDep,
     message_batch_request: MessageBatchRequest,
 ) -> MessageBatch | None:
     # TODO: add security check that user is inside current group
