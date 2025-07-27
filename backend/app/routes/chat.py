@@ -1,8 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+from fastapi import APIRouter, Body, HTTPException, status
 
 from app.deps import ConnectionDep, UserTokenExtractDep
-from app.data_model.chat_model import ChatCreate, Chat, ChatUpdate
-from app.crud_model.chat_crud import create_chat_db
+from app.data_model.chat_model import ChatCreate, Chat
+from app.crud_model.chat_crud import (
+    create_chat_db,
+    get_chats_data_db,
+    get_current_user_chat_ids_db,
+)
 from app.exceptions import DuplicateError
 
 
@@ -10,17 +15,33 @@ chat_route_prefix = "/chat"
 chat_route = APIRouter(prefix=chat_route_prefix)
 
 
-# TODO: !!!!! Need to check that all users are exists
-# But... in this case wont it will be better to return data about them at the same time?
 @chat_route.post("/create_chat", status_code=status.HTTP_201_CREATED)
 def create_chat(
     conn: ConnectionDep, user_token: UserTokenExtractDep, chat_create: ChatCreate
 ) -> Chat:
     try:
-        chat = create_chat_db(conn, chat_create, user_token)
-    except DuplicateError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
-    return chat
+        created_chat = create_chat_db(conn, chat_create, user_token)
+    except DuplicateError:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    return created_chat
+
+
+@chat_route.post("/get_current_user_chat_ids", tags=["Init"])
+def get_current_user_chats_by_token(
+    conn: ConnectionDep, user_token: UserTokenExtractDep
+) -> list[int]:
+    """Get chat ids for current user by it's token"""
+    return get_current_user_chat_ids_db(conn, user_token.user_id)
+
+
+@chat_route.post("/get_full_chats_data")
+def get_full_chats_data(
+    conn: ConnectionDep,
+    user_token: UserTokenExtractDep,
+    chat_ids: Annotated[list[int], Body],
+) -> list[Chat]:
+    """Get chats data by it's ids"""
+    return get_chats_data_db(conn, chat_ids)
 
 
 # @chat_route.post(chat_route_prefix + "/update_chat")

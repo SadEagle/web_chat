@@ -6,25 +6,24 @@ async function loginUser(event: Event) {
   event.preventDefault()
 
   const formData = new FormData(loginForm, submitForm);
-  try {
-    const response = await fetch("/api/user/login_user", {
-      method: "POST",
-      body: formData,
-    });
+  const response = await fetch("/api/user/login_user", {
+    method: "POST",
+    body: formData,
+  });
 
-    const responseData = await response.json()
-    if (response.ok) {
-      localStorage.setItem("JWToken", responseData);
-      localStorage.setItem("username", loginForm.username)
-      localStorage.setItem("userId", loginForm.userId)
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Wrong endpoint, recheck request url")
     }
-    console.log("JWT token was gotten");
-    // Redirect to home
-    window.location.replace("/home.html");
-  } catch (e) {
-    console.error(e);
-    // TODO: add error message over form
+    else {
+      console.log("Login unsuccessfull. Try again.")
+    }
   }
+
+  const responseData = await response.json()
+  localStorage.setItem("JWToken", responseData.access_token)
+  console.log("Login successfull. Token was gained.");
+  window.location.replace("/home");
 }
 
 loginForm.addEventListener("submit", loginUser);

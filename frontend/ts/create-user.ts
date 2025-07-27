@@ -4,23 +4,21 @@ async function updateUser(event: Event) {
   event.preventDefault()
 
   const formData = new FormData(createUserForm);
-  try {
-    const response = await fetch("/api/user/create_user", {
-      method: "POST",
-      body: JSON.stringify(Object.fromEntries(formData)),
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    if (response.status == 201) {
-      console.log(`Sucsessuffly create user ${formData.get("login")}`);
-      // Redirect to login
-      window.location.replace("/login.html");
+  const createUserResponse = await fetch("/api/user/create_user", {
+    method: "POST",
+    body: JSON.stringify(Object.fromEntries(formData)),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!createUserResponse.ok) {
+    if (createUserResponse.status === 404) {
+      throw new Error("Wrong endpoint, recheck request url")
     }
-  } catch (e) {
-    console.error(e);
   }
+
+  console.log(`Sucsessuffly create user ${formData.get("login")}`);
 }
 
 createUserForm.addEventListener("submit", updateUser);

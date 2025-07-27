@@ -15,7 +15,7 @@ def get_db() -> Generator[Connection, None, None]:
 
 
 ConnectionDep = Annotated[Connection, Depends(get_db)]
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login_user")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login_user")
 
 
 def extract_token_data(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:

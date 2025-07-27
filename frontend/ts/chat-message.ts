@@ -1,5 +1,5 @@
 import { ChatData } from "./chat-manager-data";
-import Message from "./message-data";
+import { Message } from "./data-model";
 
 // WARN: dummy params
 const USER_ID: bigint = BigInt(1)

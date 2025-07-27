@@ -1,19 +1,22 @@
-import Message from "./message-data";
+import { Message } from "./data-model";
 
 export async function sendMessageToServer(message: Message) {
-  try {
-    const response = await fetch('/api/chat/send_message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message)
-    });
-    const data = await response.json();
-    console.log('Message sent:', data);
-  } catch (error) {
-    console.error('Error sending message:', error);
+  const sendMessageResponse = await fetch('/api/chat/send_message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(message)
+  });
+
+  if (!sendMessageResponse.ok) {
+    if (sendMessageResponse.status === 404) {
+      throw new Error("Wrong endpoint, recheck request url")
+    }
   }
+
+  const data = await sendMessageResponse.json();
+  console.log('Message sent:', data);
 }
 
 export async function getBatchMessageFromServer() { }

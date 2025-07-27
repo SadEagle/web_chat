@@ -1,10 +1,10 @@
-from typing import Self
-
 from typing import Annotated, TypeAlias
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, TypeAdapter
 
 
 ChatName: TypeAlias = Annotated[str, Field(max_length=255)]
+
+ChatListAdapter = TypeAdapter(list["Chat"])
 
 
 class ChatCreate(BaseModel):

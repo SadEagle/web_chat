@@ -1,5 +1,4 @@
 from sqlalchemy.exc import IntegrityError
-from pydantic import TypeAdapter
 from sqlalchemy import (
     insert,
     update,
@@ -12,6 +11,7 @@ from app.data_model.user_model import (
     UserUpdate,
     User,
     UserUpdateSecure,
+    UserListAdapter,
 )
 
 from app.data_model.db_model import user_db
@@ -27,19 +27,15 @@ def create_user_db(conn: ConnectionDep, user_create: UserCreate) -> User | None:
     )
 
     try:
-        user_result_arr = (
+        user_result = (
             conn.execute(
                 insert(user_db).returning(user_db).values(user.model_dump(mode="json"))
             )
             .mappings()
-            .all()
+            .one()
         )
-    except IntegrityError as exc:
+    except IntegrityError:
         raise DuplicateError("Login or email already in use")
-
-    if len(user_result_arr) != 1:
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
-    user_result = user_result_arr[0]
 
     if user_result is None:
         return None
@@ -48,15 +44,15 @@ def create_user_db(conn: ConnectionDep, user_create: UserCreate) -> User | None:
 
 def update_user_db(conn: ConnectionDep, user_update: UserUpdate) -> User | None:
     if user_update.passwd is None:
-        hashed_passwd = None
+        user_update_secure = UserUpdateSecure(**user_update.model_dump())
     else:
-        hashed_passwd = get_passwd_hash(user_update.passwd)
-    user_update_secure = UserUpdateSecure(
-        **user_update.model_dump(),
-        hashed_passwd=hashed_passwd,
-    )
+        user_update_secure = UserUpdateSecure(
+            **user_update.model_dump(),
+            hashed_passwd=get_passwd_hash(user_update.passwd),
+        )
+
     try:
-        updated_users = (
+        updated_user = (
             conn.execute(
                 update(user_db)
                 .where(user_db.c.id == user_update.id)
@@ -66,39 +62,48 @@ def update_user_db(conn: ConnectionDep, user_update: UserUpdate) -> User | None:
                 )
             )
             .mappings()
-            .all()
+            .one_or_none()
         )
     except IntegrityError as exc:
-        if "email" in str(exc).lower():
-            raise DuplicateError(f"Email '{user_update.email}' already exists")
-        else:
-            raise DuplicateError("Unexpected column duplicate")
+        raise DuplicateError(f"Cant update user")
 
-    if len(updated_users) == 0:
+    if updated_user is None:
         return None
-    elif len(updated_users) == 1:
-        update_user_result = updated_users[0]
-    else:
-        # Impossible to achive
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
 
-    if update_user_result is None:
-        return None
-    return User.model_validate(update_user_result)
+    return User.model_validate(updated_user)
 
 
-def get_user_db(conn: ConnectionDep, user_name: str) -> User | None:
-    users_result = (
+def get_user_by_name_db(conn: ConnectionDep, user_name: str) -> User | None:
+    user_result = (
         conn.execute(select(user_db).where(user_db.c.login == user_name))
+        .mappings()
+        .one_or_none()
+    )
+
+    if user_result is None:
+        return None
+
+    return User.model_validate(user_result)
+
+
+def get_current_user_by_id(conn: ConnectionDep, user_id: int) -> User | None:
+    current_user = (
+        conn.execute(select(user_db).where(user_db.c.id == user_id))
+        .mappings()
+        .one_or_none()
+    )
+    if current_user is None:
+        return None
+    return User.model_validate(current_user)
+
+
+def get_users_by_id_db(conn: ConnectionDep, user_id_list: list[int]) -> list[User]:
+    users_result = (
+        conn.execute(select(user_db).where(user_db.c.id.in_(user_id_list)))
         .mappings()
         .all()
     )
 
     if len(users_result) == 0:
-        return None
-    elif len(users_result) == 1:
-        user = users_result[0]
-    else:
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
-
-    return User.model_validate(user)
+        return []
+    return UserListAdapter.validate_python(users_result)

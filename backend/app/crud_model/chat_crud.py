@@ -1,50 +1,13 @@
-from sqlalchemy import delete, exists, insert, select, func, text
+from typing import cast
+from sqlalchemy import delete, insert, select
 from sqlalchemy.exc import IntegrityError
 
 from app.exceptions import DuplicateError
 from app.deps import ConnectionDep
 from app.data_model.db_model import chat_user_db, chat_db
-from app.data_model.chat_model import ChatCreate, Chat, ChatUpdate, ChatDelete
+from app.data_model.chat_model import ChatCreate, Chat, ChatDelete, ChatListAdapter
 from app.data_model.token_model import TokenData
-
-
-def delete_chat_db(conn: ConnectionDep, chat_delete: ChatDelete) -> ChatDelete:
-    return ChatDelete.model_validate(
-        conn.execute(delete(chat_db).where(chat_db.c.id == chat_delete.id))
-        .mappings()
-        .first()
-    )
-
-
-def get_minimal_chat_db(conn: ConnectionDep, chat_id: int) -> Chat | None:
-    chat_user_list_arr = (
-        conn.execute(
-            select(
-                # TODO: check with attention aggregation function, does it really return list?
-                func.array_agg(chat_user_db.c.user_info_id).alias("user_id_list")
-            ).where(chat_user_db.c.chat_id == chat_id)
-        )
-        .mappings()
-        .all()
-    )
-
-    if len(chat_user_list_arr) != 1:
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
-    chat_user_list = chat_user_list_arr[0]
-
-    chat_data_arr = (
-        conn.execute(select(chat_db).where(chat_db.c.id == chat_id)).mappings().all()
-    )
-    if len(chat_data_arr) != 1:
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
-    chat_data = chat_data_arr[0]
-    # Probably, chat_user_list may be none?!
-
-    return Chat(
-        id=chat_data["id"],
-        name=chat_data["name"],
-        user_id_list=chat_user_list["user_id_list="],
-    )
+from app.routes import user
 
 
 def create_chat_db(
@@ -55,39 +18,64 @@ def create_chat_db(
         chat_create.user_id_list.append(user_token.user_id)
 
     try:
-        chat_main_data_arr = (
+        inserted_chat = (
             conn.execute(
                 insert(chat_db).values({"name": chat_create.name}).returning(chat_db)
             )
             .mappings()
-            .all()
+            .one()
         )
     except IntegrityError:
         raise DuplicateError(f"Creating chat {chat_create.name} is already exists")
 
-    if len(chat_main_data_arr) != 1:
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
-    chat_main_data = chat_main_data_arr[0]
+    conn.execute(
+        insert(chat_user_db),
+        parameters=[
+            {
+                "chat_id": inserted_chat["id"],
+                "user_info_id": user_id,
+            }
+            for user_id in chat_create.user_id_list
+        ],
+    )
 
-    chat_user_data = (
+    return Chat(
+        id=inserted_chat["id"],
+        name=inserted_chat["name"],
+        user_id_list=chat_create.user_id_list,
+    )
+
+
+def delete_chat_db(conn: ConnectionDep, chat_delete: ChatDelete) -> ChatDelete | None:
+    deleted_chat = (
+        conn.execute(delete(chat_db).where(chat_db.c.id == chat_delete.id))
+        .mappings()
+        .one_or_none()
+    )
+    if deleted_chat is None:
+        return None
+    return ChatDelete.model_validate(deleted_chat)
+
+
+def get_current_user_chat_ids_db(conn: ConnectionDep, user_id: int) -> list[int]:
+    """Get chat ids for current user"""
+    current_user_chat_ids = (
         conn.execute(
-            insert(chat_user_db).returning(chat_user_db),
-            parameters=[
-                {
-                    "chat_id": chat_main_data["id"],
-                    "user_info_id": user_id,
-                }
-                for user_id in chat_create.user_id_list
-            ],
+            select(chat_user_db.c.chat_id).where(chat_user_db.c.user_info_id == user_id)
         )
+        .scalars()
+        .all()
+    )
+    return cast(list[int], current_user_chat_ids)
+
+
+def get_chats_data_db(conn: ConnectionDep, chat_id_list: list[int]) -> list[Chat]:
+    """Get list full chat data by chat id"""
+    chats_list = (
+        conn.execute(select(chat_db).where(chat_db.c.id.in_(chat_id_list)))
         .mappings()
         .all()
     )
-    if len(chat_user_data) != len(chat_create.user_id_list):
-        raise RuntimeError("Unexpectedly much rows was transformed or acquired")
-
-    return Chat(
-        id=chat_main_data["id"],
-        name=chat_main_data["name"],
-        user_id_list=chat_create.user_id_list,
-    )
+    if len(chats_list) == 0:
+        return []
+    return ChatListAdapter.validate_python(chats_list)

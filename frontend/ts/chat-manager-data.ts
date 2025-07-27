@@ -1,4 +1,4 @@
-import Message from "./message-data"
+import { Message } from "./data-model"
 import { sendMessageToServer } from "./connection-manager"
 
 export class ChatData {

@@ -1,16 +1,16 @@
 from datetime import datetime
 from typing import Annotated, TypeAlias
 
-from pydantic import BaseModel, EmailStr, Field, aliases, computed_field
-from sqlalchemy import Alias, alias
+from pydantic import BaseModel, EmailStr, Field, TypeAdapter
 
-from app.core.config import settings
 from app.data_model.chat_model import Chat
-
 
 UserLogin: TypeAlias = Annotated[str, Field(max_length=255)]
 UserEmail: TypeAlias = Annotated[EmailStr, Field(max_length=255)]
 UserPasswd: TypeAlias = Annotated[str, Field(max_length=255)]
+
+UserListAdapter = TypeAdapter(list["User"])
+UserOutListAdapter = TypeAdapter(list["UserOut"])
 
 
 class UserBaseCreate(BaseModel):
@@ -50,7 +50,7 @@ class UserUpdate(UserUpdateBase):
 
 
 class UserUpdateSecure(UserUpdateBase):
-    hashed_passwd: str | None
+    hashed_passwd: str | None = None
 
 
 class User(UserCreateSecure):

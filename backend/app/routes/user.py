@@ -1,11 +1,17 @@
 from typing import Annotated
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.deps import ConnectionDep, UserTokenExtractDep
-from app.crud_model.user_crud import create_user_db, get_user_db, update_user_db
+from app.crud_model.user_crud import (
+    create_user_db,
+    get_user_by_name_db,
+    get_users_by_id_db,
+    get_current_user_by_id,
+    update_user_db,
+)
 from app.core.secret import (
     create_access_token,
     verify_passwd_hash,
@@ -14,6 +20,8 @@ from app.data_model.user_model import (
     UserCreate,
     UserUpdate,
     UserOut,
+    UserListAdapter,
+    UserOutListAdapter,
 )
 from app.data_model.token_model import TokenData, TokenCreate
 from app.core.config import settings
@@ -53,7 +61,7 @@ def generate_user_token(
     conn: ConnectionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> TokenCreate:
-    user = get_user_db(conn, form_data.username)
+    user = get_user_by_name_db(conn, form_data.username)
     if user is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User wasn't found")
 
@@ -77,3 +85,34 @@ def create_user(conn: ConnectionDep, user_create: UserCreate) -> UserOut:
     if user_created is None:
         raise NoCreatedElementError("User wasn't created")
     return UserOut.model_validate(user_created.model_dump(mode="json"))
+
+
+@user_route.post("/get_user_data_by_id")
+def get_users_by_id(
+    conn: ConnectionDep,
+    user_token: UserTokenExtractDep,
+    users_id_list: Annotated[list[int], Body],
+) -> list[UserOut]:
+    """Get user list unfo by corresponding user id list"""
+    users_list = get_users_by_id_db(conn, users_id_list)
+    if len(users_list) == 0:
+        return []
+    user_out_list = UserOutListAdapter.validate_python(
+        UserListAdapter.dump_python(users_list, mode="json")
+    )
+    return user_out_list
+
+
+@user_route.post("/get_current_user", tags=["Init"])
+def get_current_user(
+    conn: ConnectionDep,
+    user_token: UserTokenExtractDep,
+) -> UserOut:
+    user_data = get_current_user_by_id(conn, user_token.user_id)
+    if user_data is None:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "User for current token doesn't exist",
+        )
+
+    return UserOut.model_validate(user_data.model_dump(mode="json"))

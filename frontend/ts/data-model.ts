@@ -1,4 +1,18 @@
-export default class Message {
+export type User = {
+  id: bigint
+  login: string
+
+};
+
+export type Chat = {
+  id: bigint
+  name: string
+  user_id_list: Array<bigint>
+};
+
+
+
+export class Message {
   // FIX:: we need to read userId 100%
   static currentUserId: bigint = BigInt(localStorage.getItem("userId") || "-1000")
 
@@ -14,4 +28,3 @@ export default class Message {
     this.isOwnerMessage = userId === Message.currentUserId
   }
 }
-
