@@ -43,23 +43,26 @@
       packages.${system}."container" = pkgs.dockerTools.buildImage {
         name = "web-chat-front";
         tag = "latest";
-        fromImage = pkgs.dockerTools.pullImage {
-          imageName = "nginx";
-          imageDigest = "sha256:ae4d4425caf0466532f4c0baf12a55070e827898b4584b8bc181adca9453d3af";
-          finalImageTag = "alpine";
-          sha256 = "sha256:ae4d4425caf0466532f4c0baf12a55070e827898b4584b8bc181adca9453d3af";
-        };
         copyToRoot = [
+          pkgs.nginx
           frontendApp
         ];
-        runAsRoot = ''
-          cp ${nginxConfig} /etc/nginx/nginx.config
-        '';
         config = {
           ExposedPorts = {
             "80" = { };
           };
+          Cmd = [
+            "nginx"
+            "-g"
+            "daemon off;"
+          ];
         };
+        extraCommands = ''
+          mkdir -p etc/nginx
+          cp ${nginxConfig} etc/nginx/nginx.conf
+
+          mkdir -p var/log/nginx
+        '';
       };
     };
 }

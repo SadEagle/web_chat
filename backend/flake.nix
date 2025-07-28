@@ -8,30 +8,27 @@
   };
 
   outputs =
-    { nixpkgs, ... }@inputs:
+    { nixpkgs, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      pkgsModule =
+      pythonModule =
         with pkgs;
         (python313.withPackages (
           python-pkgs: with python-pkgs; [
-            sqlite
-            psycopg2
-
-            bcrypt
-            pyjwt
-            passlib
-            pytest
-            celery
             fastapi
-            pydantic-settings
             fastapi-cli
             sqlalchemy
+            sqlite
+            psycopg2
+            pytest
             httpx
-
+            bcrypt
+            passlib
+            pyjwt
             python-multipart
             email-validator
+            pydantic-settings
           ]
         ));
       backendApp = pkgs.stdenv.mkDerivation {
@@ -39,26 +36,28 @@
         src = ./app;
         installPhase = ''
           mkdir -p $out/app
-          cp -r $src/* $out/app/
+          cp -r $src/* $out/app
         '';
       };
     in
     {
       devShells.${system}.default = pkgs.mkShell {
-        packages = [ pkgsModule ];
+        packages = [ pythonModule ];
       };
 
       packages.${system}.container = pkgs.dockerTools.buildImage {
-        name = "web_chat_backend";
+        name = "web-chat-backend";
         tag = "latest";
         copyToRoot = [
-          pkgsModule
           backendApp
+          pythonModule
         ];
         config = {
-          Expose = "8000";
+          ExposedPorts = {
+            "8000" = { };
+          };
           Cmd = [
-            "${pkgsModule}/bin/fastapi"
+            "${pythonModule}/bin/fastapi"
             "run"
             "${backendApp}/app/main.py"
             "--host"
