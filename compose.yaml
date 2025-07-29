@@ -1,15 +1,16 @@
+# TODO: add volumes
 services:
   db:
     image: postgres:18beta2-alpine3.22
     ports:
-      - "8050:5432"
+      - "8082:5432"
     networks:
       - backend
 
   frontend:
-    image: web-chat-front:latest
+    image: web-chat-frontend:latest
     ports:
-      - "8051:80"
+      - "8081:80"
     # develop:
     #   watch:
     #     - path: ./frontend/
@@ -18,9 +19,9 @@ services:
       - backend
 
   backend:
-    image: web-chat-back:latest
+    image: web-chat-backend:latest
     ports:
-      - "8052:8000"
+      - "8080:8000"
     # develop:
     #   watch:
     #     - path: ./backend/

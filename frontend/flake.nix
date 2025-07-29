@@ -14,7 +14,6 @@
         name = "web-chat-frontend";
         src = ./.;
         buildInputs = with pkgs; [
-          nodejs
           typescript
         ];
         buildPhase = ''
