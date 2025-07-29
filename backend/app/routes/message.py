@@ -30,7 +30,7 @@ def send_message(
     return None
 
 
-@message_route.post("/get_batch_message")
+@message_route.put("/get_batch_message")
 def get_batch_message(
     conn: ConnectionDep,
     user_token: UserTokenExtractDep,

@@ -2,9 +2,8 @@
   description = "web chat backend flake";
 
   inputs = {
-    # TODO: come back to unstable when better internet
-    # nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
   };
 
   outputs =
@@ -41,6 +40,12 @@
       };
     in
     {
+      shellHook = pkgs.mkShell {
+        shellHook = ''
+          exec fish
+        '';
+      };
+
       devShells.${system}.default = pkgs.mkShell {
         packages = [ pythonModule ];
       };

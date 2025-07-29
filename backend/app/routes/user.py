@@ -32,7 +32,7 @@ user_route_prefix = "/user"
 user_route = APIRouter(prefix=user_route_prefix)
 
 
-@user_route.post("/update_user")
+@user_route.put("/update_user")
 def update_user(
     conn: ConnectionDep,
     user_token: UserTokenExtractDep,
@@ -87,7 +87,7 @@ def create_user(conn: ConnectionDep, user_create: UserCreate) -> UserOut:
     return UserOut.model_validate(user_created.model_dump(mode="json"))
 
 
-@user_route.post("/get_user_data_by_id")
+@user_route.put("/get_user_data_by_id")
 def get_users_by_id(
     conn: ConnectionDep,
     user_token: UserTokenExtractDep,
@@ -103,7 +103,7 @@ def get_users_by_id(
     return user_out_list
 
 
-@user_route.post("/get_current_user", tags=["Init"])
+@user_route.put("/get_current_user", tags=["Init"])
 def get_current_user(
     conn: ConnectionDep,
     user_token: UserTokenExtractDep,

@@ -19,7 +19,7 @@ async function loadUserProfile() {
 
   // Get user profile
   const userResponse = await fetch('/api/user/get_current_user', {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -38,7 +38,7 @@ async function loadUserProfile() {
   sessionStorage.setItem("username", user.login)
   // Get user chats ids
   const chatIdArrayResponse = await fetch('/api/chat/get_current_user_chat_ids', {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`

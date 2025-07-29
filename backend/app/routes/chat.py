@@ -26,7 +26,7 @@ def create_chat(
     return created_chat
 
 
-@chat_route.post("/get_current_user_chat_ids", tags=["Init"])
+@chat_route.put("/get_current_user_chat_ids", tags=["Init"])
 def get_current_user_chats_by_token(
     conn: ConnectionDep, user_token: UserTokenExtractDep
 ) -> list[int]:
@@ -34,7 +34,7 @@ def get_current_user_chats_by_token(
     return get_current_user_chat_ids_db(conn, user_token.user_id)
 
 
-@chat_route.post("/get_full_chats_data")
+@chat_route.put("/get_full_chats_data")
 def get_full_chats_data(
     conn: ConnectionDep,
     user_token: UserTokenExtractDep,
@@ -44,10 +44,11 @@ def get_full_chats_data(
     return get_chats_data_db(conn, chat_ids)
 
 
-# @chat_route.post(chat_route_prefix + "/update_chat")
+# @chat_route.patch(chat_route_prefix + "/update_chat")
 # def update_chat(conn: ConnectionDep, user_token: UserTokenExtractDep, chat_update: ChatUpdate) -> Chat:
 #     try
 #
 
 # TODO: add verification that it's possible
+# @chat_route.delete(....)
 # def delete_user_chat()
