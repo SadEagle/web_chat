@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "es2020",
-    "rootDir": "./ts",
-    "outDir": "./js",
+    "rootDir": "./web/ts",
+    "outDir": "./web/js",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

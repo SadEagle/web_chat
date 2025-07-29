@@ -2,8 +2,7 @@
   description = "web chat backend flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    # nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs =
@@ -31,7 +30,7 @@
           ]
         ));
       backendApp = pkgs.stdenv.mkDerivation {
-        name = "backend";
+        name = "web-chat-backend";
         src = ./app;
         installPhase = ''
           mkdir -p $out/app
@@ -59,7 +58,7 @@
         ];
         config = {
           ExposedPorts = {
-            "8000" = { };
+            "8000/tcp" = { };
           };
           Cmd = [
             "${pythonModule}/bin/fastapi"

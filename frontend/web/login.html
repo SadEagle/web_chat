@@ -18,7 +18,7 @@
         <input type="text" id="login-username" name="username" autofocus><br><br>
         <label for="login-passwd">Password:</label><br>
         <input type="password" id="login-passwd" name="password"><br><br>
-        <input type="button" value="Register" onclick="window.location.href='/create_user'">
+        <input type="button" value="Register" onclick="redirectCreateUser()">
         <input type="submit" id="login-submit-form" value="Sign in">
       </form>
 
@@ -26,6 +26,11 @@
   </div>
 
   <script src="/js/login-user.js"></script>
+  <script>
+    function redirectCreateUser() {
+      window.location.href = "/create_user"
+    }
+  </script>
 </body>
 
 </html>

@@ -2,7 +2,7 @@
   description = "web chat frontend flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs =
@@ -11,7 +11,7 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       frontendApp = pkgs.stdenv.mkDerivation {
-        name = "frontend";
+        name = "web-chat-frontend";
         src = ./.;
         buildInputs = with pkgs; [
           nodejs
@@ -22,43 +22,64 @@
         '';
         installPhase = ''
           mkdir -p $out
-          cp -p -r $src/* $out
+          cp -r ./web/* $out
         '';
       };
-      nginxConfig = pkgs.writeText "nginx.conf" ''
+      nginxConf = pkgs.writeText "nginx.conf" ''
+        user nobody nobody;
+        daemon off;
+        error_log /dev/stdout info;
+        pid /dev/null;
+        events {}
         http {
+          access_log /dev/stdout;
           server {
             listen 80;
+            root ${frontendApp};
+            location = / {
+              return 302 $scheme://$http_host/home;
+            }
             location / {
-              root ${frontendApp}
               try_files $uri $uri.html =404;
+            }
+            location /css/ {
+              add_header Content-Type text/css;
+            }
+            location /js/ {
+              add_header Content-Type application/javascript;
             }
           }
         }
       '';
+
     in
     {
       # TODO: add volume for logs
       packages.${system}."container" = pkgs.dockerTools.buildImage {
-        name = "web-chat-front";
+        name = "web-chat-frontend";
         tag = "latest";
-        fromImage = pkgs.dockerTools.pullImage {
-          imageName = "nginx";
-          imageDigest = "sha256:ae4d4425caf0466532f4c0baf12a55070e827898b4584b8bc181adca9453d3af";
-          finalImageTag = "alpine";
-          sha256 = "sha256:ae4d4425caf0466532f4c0baf12a55070e827898b4584b8bc181adca9453d3af";
-        };
-        copyToRoot = [
+        copyToRoot = with pkgs; [
+          fakeNss
+          nginx
           frontendApp
         ];
-        runAsRoot = ''
-          cp ${nginxConfig} /etc/nginx/nginx.config
-        '';
         config = {
           ExposedPorts = {
-            "80" = { };
+            "80/tcp" = { };
           };
+          Cmd = [
+            "nginx"
+            "-c"
+            nginxConf
+          ];
         };
+        runAsRoot = ''
+          mkdir -p tmp/nginx_client_body
+
+          # nginx still tries to read this directory even if error_log
+          # directive is specifying another file :/
+          mkdir -p var/log/nginx
+        '';
       };
     };
 }
