@@ -23,12 +23,16 @@ class Settings(BaseSettings):
     BATCH_MESSAGE_SIZE: int = 50
     RUN_MODE: RunMode = RunMode.DEV
     # TODO: isolate in late future
-    # SQLALCHEMY_PROD_DB_URL: str = "postgresql://chatter:secret@localhost:5432/prod_chat"
-    # SQLALCHEMY_DEV_DB_URL: str = "postgresql://chatter:secret@localhost:5432/dev_chat"
-    # SQLALCHEMY_TEST_DB_URL: str = "postgresql://chatter:secret@localhost:5432/test_chat"
-
-    SQLALCHEMY_PROD_DB_URL: str = "sqlite:///prod_chat.db"
-    SQLALCHEMY_DEV_DB_URL: str = "sqlite:///dev_chat.db"
+    # SQLALCHEMY_PROD_DB_URL: str = (
+    #     "postgresql://chatter:secret@postgres-db:5432/prod_chat"
+    #
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
+    SQLALCHEMY_DEV_DB_URL: str = "postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@postgres-db:5432/{self.POSTGRES_DB}"
+    # SQLALCHEMY_TEST_DB_URL: str = "postgresql://chatter:secret@postgres-db:5432/test_chat"
+    # SQLALCHEMY_PROD_DB_URL: str = "sqlite:///test_chat.db"
+    SQLALCHEMY_DEV_DB_URL: str = "sqlite:///test_chat.db"
     SQLALCHEMY_TEST_DB_URL: str = "sqlite:///test_chat.db"
 
 
