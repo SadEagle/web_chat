@@ -1,39 +1,72 @@
-# TODO: add volumes
 services:
+  traefik:
+    image: traefik:v3.5
+    restart: unless-stopped
+    networks:
+      - proxy
+    environment:
+      # PROD/DEV/TEST
+      - RUN_MODE=prod
+    ports:
+      - "80:80"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      - "--entrypoints.web.address=:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   db:
     image: postgres:18beta2-alpine3.22
-    ports:
-      - "8082:5432"
+    restart: always
+    shm_size: 128mb
+    env_file:
+      - ./env/.env_db
+    volumes:
+      - postgre_volume:/var/lib/postgresql/data
     networks:
       - backend
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
 
   frontend:
     image: web-chat-frontend:latest
-    ports:
-      - "8081:80"
-    # develop:
-    #   watch:
-    #     - path: ./frontend/
-    #       action: rebuild
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=!PathPrefix(`/api`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
     depends_on:
       - backend
 
   backend:
     image: web-chat-backend:latest
-    ports:
-      - "8080:8000"
-    # develop:
-    #   watch:
-    #     - path: ./backend/
-    #       action: rebuild
+    restart: unless-stopped
+    env_file:
+      - ./env/.env_db
     networks:
-      - frontend
+      - proxy
       - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 networks:
-  frontend:
-    driver: bridge
+  proxy:
+    name: proxy
   backend:
     driver: bridge
+
+volumes:
+  postgre_volume:
