@@ -7,14 +7,13 @@ services:
     environment:
       # PROD/DEV/TEST
       - RUN_MODE=prod
+    ports:
+      - "80:80"
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=proxy"
-      - "--entryPoints.web.address=:80"
-    ports:
-      - "80:80"
-      - "8080:8080"
+      - "--entrypoints.web.address=:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
@@ -42,7 +41,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`frontend.docker.localhost`) || !PathPrefix(`/api`)"
+      - "traefik.http.routers.frontend.rule=!PathPrefix(`/api`)"
       - "traefik.http.routers.frontend.entrypoints=web"
     depends_on:
       - backend
@@ -57,7 +56,6 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      # - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=web"
     depends_on:
