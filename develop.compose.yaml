@@ -1,0 +1,8 @@
+services:
+  frontend:
+    volumes:
+      - ./frontend/web/:/frontend/web/
+
+  backend:
+    volumes:
+      - ./backend/app/:/backend/app

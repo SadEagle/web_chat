@@ -7,7 +7,7 @@ WORKDIR /backend
 COPY ./uv.lock ./pyproject.toml ./
 RUN uv sync --frozen --no-cache
 
-COPY ./app ./app
+COPY ./app/ ./app/
 CMD [ "./.venv/bin/fastapi", "run", "./app/main.py" ]
 
 EXPOSE 8000

@@ -37,10 +37,6 @@ services:
     build: ./frontend
     image: web-chat-frontend:latest
     restart: unless-stopped
-    # develop:
-    #   watch:
-    #     - path: ./frontend/web/
-    #       action: sync
     networks:
       - proxy
     labels:
@@ -74,5 +70,5 @@ networks:
   backend:
     driver: bridge
 
-# volumes:
-#   postgre_volume:
+volumes:
+  postgre_volume:
