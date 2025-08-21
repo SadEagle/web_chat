@@ -9,3 +9,6 @@ RUN uv sync --frozen --no-cache
 
 COPY ./app ./app
 CMD [ "./.venv/bin/fastapi", "run", "./app/main.py" ]
+
+EXPOSE 8000
+
