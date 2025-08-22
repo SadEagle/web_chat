@@ -1,8 +1,8 @@
 services:
   frontend:
     volumes:
-      - ./frontend/web/:/frontend/web/
+      - ./frontend/web/:/usr/share/nginx/
 
   backend:
     volumes:
-      - ./backend/app/:/backend/app
+      - ./backend/app/:/backend/app/

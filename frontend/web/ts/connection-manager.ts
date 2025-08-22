@@ -1,7 +1,7 @@
-import { Message } from "./data-model";
+import { Message } from "./data-model.js";
 
 export async function sendMessageToServer(message: Message) {
-  const sendMessageResponse = await fetch('/api/chat/send_message', {
+  const sendMessageResponse = await fetch('/api/message/send_message', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -25,7 +25,7 @@ from app.data_model.user_model import (
 )
 from app.data_model.token_model import TokenData, TokenCreate
 from app.core.config import settings
-from app.exceptions import DuplicateError, NoCreatedElementError
+from app.exceptions import DuplicateError
 
 
 user_route_prefix = "/user"
@@ -80,10 +80,12 @@ def generate_user_token(
 def create_user(conn: ConnectionDep, user_create: UserCreate) -> UserOut:
     try:
         user_created = create_user_db(conn, user_create)
-    except DuplicateError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+    except DuplicateError:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Some data already exists")
     if user_created is None:
-        raise NoCreatedElementError("User wasn't created")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "User wasn't created"
+        )
     return UserOut.model_validate(user_created.model_dump(mode="json"))
 
 

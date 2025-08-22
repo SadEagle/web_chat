@@ -16,9 +16,17 @@ async function updateUser(event: Event) {
     if (createUserResponse.status === 404) {
       throw new Error("Wrong endpoint, recheck request url")
     }
+    else if (createUserResponse.status === 422) {
+      throw new Error("Bad field data")
+    }
+    else {
+      throw new Error("Unexpected error")
+    }
   }
-
-  console.log(`Sucsessuffly create user ${formData.get("login")}`);
+  else {
+    console.log(`Sucsessuffly create user ${formData.get("login")}. Redirect to /login`)
+    window.location.href = "/login"
+  }
 }
 
-createUserForm.addEventListener("submit", updateUser);
+createUserForm.addEventListener("submit", updateUser)

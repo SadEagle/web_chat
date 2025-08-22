@@ -1,17 +1,17 @@
-import { Message } from "./data-model"
-import { sendMessageToServer } from "./connection-manager"
+import { Message } from "./data-model.js"
+import { sendMessageToServer } from "./connection-manager.js"
 
 export class ChatData {
-  static currentUserId: bigint = BigInt(localStorage.getItem("userId") || -1000)
+  static currentUserId: string = localStorage.getItem("userId") || "null"
   static currentUserName: string = localStorage.getItem("username") || "null"
   static chatWindow = document.getElementById("chat-window") as HTMLDivElement
   static sendMessageToBackend: Function = sendMessageToServer
 
-  chatId: bigint
-  userIdList: Array<bigint>
+  chatId: string
+  userIdList: Array<string>
   messageList: Array<Message>
 
-  constructor(chatId: bigint, userIdList: Array<bigint>) {
+  constructor(chatId: string, userIdList: Array<string>) {
     this.chatId = chatId
     this.userIdList = userIdList
     this.messageList = []
@@ -42,6 +42,4 @@ export class ChatData {
       this.visualizeMessage(messageSample)
     }
   }
-
 }
-

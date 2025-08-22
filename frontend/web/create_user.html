@@ -20,6 +20,7 @@
         <input type="text" id="create-email" name="email"><br><br>
         <label for="create-pass">Passord:</label><br>
         <input type="text" id="create-pass" name="passwd"><br><br>
+        <input type="button" value="Back" onclick="redirectLogin()">
         <input type="submit" value="Create">
       </form>
 
@@ -27,6 +28,11 @@
   </div>
 
   <script src="/js/create-user.js"> </script>
+  <script>
+    function redirectLogin() {
+      window.location.href = "/login"
+    }
+  </script>
 </body>
 
 </html>

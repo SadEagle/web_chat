@@ -1,27 +1,27 @@
 export type User = {
-  id: bigint
+  user_id: string
   login: string
 
 };
 
 export type Chat = {
-  id: bigint
+  id: string
   name: string
-  user_id_list: Array<bigint>
+  user_id_list: Array<string>
 };
 
 
 
 export class Message {
   // FIX:: we need to read userId 100%
-  static currentUserId: bigint = BigInt(localStorage.getItem("userId") || "-1000")
+  static currentUserId: string = localStorage.getItem("userId") || "null"
 
-  chatId: bigint
-  userId: bigint
+  chatId: string
+  userId: string
   messageData: string
   isOwnerMessage: boolean
 
-  constructor(chatId: bigint, userId: bigint, message: string) {
+  constructor(chatId: string, userId: string, message: string) {
     this.chatId = chatId
     this.userId = userId
     this.messageData = message

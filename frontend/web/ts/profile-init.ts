@@ -35,7 +35,8 @@ async function loadUserProfile() {
     }
   }
   const user: User = await userResponse.json()
-  sessionStorage.setItem("username", user.login)
+  localStorage.setItem("username", user.login)
+  localStorage.setItem("userId", user.user_id.toString())
   // Get user chats ids
   const chatIdArrayResponse = await fetch('/api/chat/get_current_user_chat_ids', {
     method: 'PUT',
@@ -49,9 +50,9 @@ async function loadUserProfile() {
       throw new Error("Wrong endpoint, recheck request url")
     }
   }
-  const chatIdArray: Array<bigint> = await chatIdArrayResponse.json()
+  const chatIdArray: Array<string> = await chatIdArrayResponse.json()
 
-  sessionStorage.setItem("chatIdArray", JSON.stringify(chatIdArray))
+  localStorage.setItem("chatIdArray", JSON.stringify(chatIdArray))
   // TODO: make 2 options below as isolated functions
   // 1. Get full chat data
   // 2. Visualise data itself
